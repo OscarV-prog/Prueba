@@ -2,7 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import CredentialsProvider from "next-auth/providers/credentials";
-import * as bcrypt from "bcryptjs";
+import * as bcrypt from "bcrypt-ts";
 import { signupSchema } from "~/modules/auth/auth.dto";
 
 import { db } from "~/server/db";

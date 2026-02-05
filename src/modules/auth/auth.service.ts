@@ -1,6 +1,6 @@
 import { db } from "~/server/db";
 import type { SignupDto } from "~/modules/auth/auth.dto";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcrypt-ts";
 
 export async function signup(dto: SignupDto) {
     const { email, password, name } = dto;
