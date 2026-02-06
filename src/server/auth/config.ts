@@ -1,42 +1,19 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import * as bcrypt from "bcrypt-ts";
-import { signupSchema } from "~/modules/auth/auth.dto";
-
 import { db } from "~/server/db";
+import { authConfigBase } from "./config.base";
 
 /**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      activeWorkspaceId?: string;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    activeWorkspaceId?: string;
-  }
-}
-
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
+ * Main Options for NextAuth.js used in the server-side (API routes, etc.).
+ * Includes database adapter and full provider logic.
  */
 export const authConfig = {
+  ...authConfigBase,
+  adapter: PrismaAdapter(db),
   providers: [
-    DiscordProvider({
-      clientId: process.env.AUTH_DISCORD_ID,
-      clientSecret: process.env.AUTH_DISCORD_SECRET,
-    }),
+    ...authConfigBase.providers,
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -68,47 +45,24 @@ export const authConfig = {
         };
       },
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
-  adapter: PrismaAdapter(db),
   callbacks: {
+    ...authConfigBase.callbacks,
     session: ({ session, user, token }) => {
-      // For Credentials provider, 'user' is undefined and we should use 'token'
+      // Extended session callback for database-backed sessions if needed
+      const baseSession = authConfigBase.callbacks.session({ session, token } as any);
+      
       const userId = user?.id ?? token?.sub;
       const activeWorkspaceId = (user as any)?.activeWorkspaceId ?? (token as any)?.activeWorkspaceId;
 
       return {
-        ...session,
+        ...baseSession,
         user: {
-          ...session.user,
+          ...baseSession.user,
           id: userId,
           activeWorkspaceId,
         },
       };
     },
-    jwt: ({ token, user, trigger, session }) => {
-      if (user) {
-        token.activeWorkspaceId = (user as any).activeWorkspaceId;
-      }
-      if (trigger === "update" && (session as any)?.activeWorkspaceId) {
-        token.activeWorkspaceId = (session as any).activeWorkspaceId;
-      }
-      return token;
-    },
-  },
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/auth/signin",
-    newUser: "/auth/signup",
   },
 } satisfies NextAuthConfig;
