@@ -40,11 +40,8 @@ export default function OnboardingPage() {
                 activeWorkspaceId: data.id
             });
 
-            // Critical: wait for a tiny bit to ensure the session is propagated
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            router.refresh();
-            router.push("/dashboard");
+            // Hard redirect to ensure the cookie is processed by middleware
+            window.location.href = "/dashboard";
         } catch (err: any) {
             setError(err.message);
         } finally {

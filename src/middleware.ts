@@ -37,12 +37,24 @@ export default auth((req) => {
 
     // Redirect to onboarding if user belongs to no workspace (has no activeWorkspaceId)
     const isApiRoute = nextUrl.pathname.startsWith("/api");
+
+    // Diagnostic log
+    console.log("Middleware Check:", {
+        path: nextUrl.pathname,
+        isLoggedIn,
+        activeWorkspaceId: user?.activeWorkspaceId
+    });
+
     if (!user?.activeWorkspaceId && !isOnboardingRoute && !isApiRoute) {
+        console.log("Redirecting to /onboarding because no workspace found");
+        // The instruction to use window.location for onboarding redirect is client-side.
+        // Middleware runs on the server, so NextResponse.redirect is the correct approach here.
         return NextResponse.redirect(new URL("/onboarding", nextUrl));
     }
 
     // Prevent accessing onboarding if already has a workspace
     if (user?.activeWorkspaceId && isOnboardingRoute) {
+        console.log("Redirecting to /dashboard because workspace exists");
         return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
 

@@ -48,6 +48,7 @@ export const authConfigBase = {
     jwt: ({ token, user, trigger, session }) => {
       if (user) {
         token.activeWorkspaceId = (user as any).activeWorkspaceId;
+        token.id = user.id;
       }
       if (trigger === "update" && (session as any)?.activeWorkspaceId) {
         token.activeWorkspaceId = (session as any).activeWorkspaceId;
