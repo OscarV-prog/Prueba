@@ -1,13 +1,15 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, User, LayoutDashboard, Users } from "lucide-react";
+import { LogOut, User, LayoutDashboard, Users, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "~/providers/language-provider";
 
 export function UserMenu() {
     const { data: session } = useSession();
+    const { t } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -55,12 +57,20 @@ export function UserMenu() {
 
                         <div className="py-1">
                             <Link
+                                href="/onboarding"
+                                onClick={() => setIsOpen(false)}
+                                className="group flex items-center px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/30 rounded-lg mx-1 transition-colors font-semibold shadow-sm"
+                            >
+                                <Plus className="mr-3 h-4 w-4" />
+                                {t.common.addWorkspace}
+                            </Link>
+                            <Link
                                 href="/dashboard"
                                 onClick={() => setIsOpen(false)}
                                 className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 rounded-lg mx-1 transition-colors"
                             >
                                 <LayoutDashboard className="mr-3 h-4 w-4" />
-                                My Dashboard
+                                {t.common.myDashboard}
                             </Link>
                             <Link
                                 href="/team"
@@ -68,7 +78,7 @@ export function UserMenu() {
                                 className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 dark:text-gray-300 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 rounded-lg mx-1 transition-colors"
                             >
                                 <Users className="mr-3 h-4 w-4" />
-                                Team Overview
+                                {t.common.teamOverview}
                             </Link>
                         </div>
 
@@ -78,7 +88,7 @@ export function UserMenu() {
                                 className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg mx-1 transition-colors"
                             >
                                 <LogOut className="mr-3 h-4 w-4" />
-                                Sign out
+                                {t.common.logout}
                             </button>
                         </div>
                     </motion.div>

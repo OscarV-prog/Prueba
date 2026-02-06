@@ -7,6 +7,39 @@ const workspaceSchema = z.object({
     name: z.string().min(1).max(50),
 });
 
+export async function GET() {
+    const session = await auth();
+
+    if (!session?.user) {
+        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const workspaces = await db.workspace.findMany({
+            where: {
+                users: {
+                    some: {
+                        userId: session.user.id,
+                    },
+                },
+            },
+            include: {
+                _count: {
+                    select: { users: true }
+                }
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return NextResponse.json(workspaces);
+    } catch (error) {
+        console.error("Fetch workspaces error:", error);
+        return NextResponse.json({ message: "Failed to fetch workspaces" }, { status: 500 });
+    }
+}
+
 export async function POST(req: Request) {
     const session = await auth();
 

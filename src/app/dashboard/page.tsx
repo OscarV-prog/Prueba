@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTasksStore } from "~/stores/tasks.store";
 import { QuickAdd } from "~/components/dashboard/quick-add";
 import { ProgressBar } from "~/components/dashboard/progress-bar";
@@ -24,7 +24,12 @@ import { generateMidpoint } from "~/utils/fractional-indexing";
 import { motion } from "framer-motion";
 import { useLanguage } from "~/providers/language-provider";
 
+import { useSession } from "next-auth/react";
+import { Briefcase, Plus, Sparkles, Loader2 } from "lucide-react";
+import Link from "next/link";
+
 export default function DashboardPage() {
+    const { data: session } = useSession();
     const { tasks, loading, fetchMyDayTasks, reorderTask } = useTasksStore();
     const { t, language } = useLanguage();
 
@@ -35,9 +40,95 @@ export default function DashboardPage() {
         })
     );
 
+    const [skipped, setSkipped] = useState(false);
+    const [isSkipping, setIsSkipping] = useState(false);
+
+    const handleSkip = async () => {
+        setIsSkipping(true);
+        try {
+            // Create or get Personal workspace
+            const res = await fetch("/api/v1/workspaces/personal", {
+                method: "POST",
+            });
+
+            if (res.ok) {
+                const { workspaceId } = await res.json();
+
+                // Switch to it
+                await fetch("/api/v1/workspaces/active", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ workspaceId }),
+                });
+
+                // Force reload to update session
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Failed to skip:", error);
+            setIsSkipping(false);
+        }
+    };
+
     useEffect(() => {
-        void fetchMyDayTasks();
-    }, [fetchMyDayTasks]);
+        if (session?.user?.activeWorkspaceId) {
+            void fetchMyDayTasks();
+        }
+    }, [fetchMyDayTasks, session?.user?.activeWorkspaceId]);
+
+    // If no workspace active, show premium empty state
+    if (!session?.user?.activeWorkspaceId && !loading && !skipped) {
+        return (
+            <div className="flex min-h-[calc(100vh-64px)] items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative w-full max-w-lg"
+                >
+                    {/* Background decorations */}
+                    <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
+                    <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
+
+                    <div className="relative overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white/40 p-12 text-center backdrop-blur-2xl shadow-2xl dark:border-gray-800 dark:bg-gray-950/40">
+                        <button
+                            onClick={handleSkip}
+                            className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                            title={t.dashboard.skip}
+                        >
+                            {isSkipping ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                            )}
+                        </button>
+
+                        <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-xl shadow-indigo-500/20">
+                            <Briefcase className="h-10 w-10 text-white" />
+                        </div>
+
+                        <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+                            {t.dashboard.noWorkspaceTitle}
+                        </h2>
+                        <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">
+                            {t.dashboard.noWorkspaceDesc}
+                        </p>
+
+                        <div className="mt-10 flex flex-col items-center space-y-4">
+                            <Link
+                                href="/onboarding"
+                                className="group relative flex w-full items-center justify-center space-x-3 rounded-2xl bg-indigo-600 py-4 text-lg font-bold text-white shadow-xl shadow-indigo-500/25 transition-all hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                <Plus className="h-5 w-5" />
+                                <span>{t.common.createWorkspace}</span>
+                                <Sparkles className="absolute right-6 h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100" />
+                            </Link>
+                            <p className="text-sm text-gray-400">
+                                {t.dashboard.noWorkspaceQuote}
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     const overdueTasks = tasks.filter(
         (t) =>
@@ -46,6 +137,7 @@ export default function DashboardPage() {
     const todayTasks = tasks.filter((t) => !overdueTasks.includes(t));
 
     const handleDragEnd = async (event: DragEndEvent) => {
+        // ... existing drag end logic ...
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
@@ -85,7 +177,7 @@ export default function DashboardPage() {
                         {t.dashboard.myDay}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 capitalize">
-                        {new Date().toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
+                        {new Date().toLocaleDateString(language === "es" ? "es-ES" : "en-US", {
                             weekday: "long",
                             month: "long",
                             day: "numeric",

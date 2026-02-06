@@ -8,9 +8,5 @@ export default async function RootPage() {
     redirect("/auth/signin");
   }
 
-  if (!session.user.activeWorkspaceId) {
-    redirect("/onboarding");
-  }
-
   redirect("/dashboard");
 }

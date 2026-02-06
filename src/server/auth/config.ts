@@ -48,21 +48,40 @@ export const authConfig = {
   ],
   callbacks: {
     ...authConfigBase.callbacks,
-    session: ({ session, user, token }) => {
-      // Extended session callback for database-backed sessions if needed
-      const baseSession = authConfigBase.callbacks.session({ session, token } as any);
-
-      const userId = user?.id ?? token?.sub;
-      const activeWorkspaceId = (user as any)?.activeWorkspaceId ?? (token as any)?.activeWorkspaceId;
-
+    session: ({ session, token }) => {
       return {
-        ...baseSession,
+        ...session,
         user: {
-          ...baseSession.user,
-          id: userId,
-          activeWorkspaceId,
+          ...session.user,
+          id: token.sub as string,
+          activeWorkspaceId: (token as any).activeWorkspaceId as string | undefined,
         },
       };
+    },
+    jwt: async ({ token, user, trigger, session }) => {
+      if (user) {
+        token.id = user.id;
+        token.activeWorkspaceId = (user as any).activeWorkspaceId;
+      }
+
+      // Allow manual updates
+      if (trigger === "update" && (session as any)?.activeWorkspaceId) {
+        token.activeWorkspaceId = (session as any).activeWorkspaceId;
+      }
+
+      // IF we have a token sub (user ID), let's try to refresh the workspace ID from DB
+      // This handles cases where we updated the DB but didn't explicitly call update() on the client
+      if (token.sub) {
+        const freshUser = await db.user.findUnique({
+          where: { id: token.sub },
+          select: { activeWorkspaceId: true },
+        });
+        if (freshUser) {
+          token.activeWorkspaceId = freshUser.activeWorkspaceId;
+        }
+      }
+
+      return token;
     },
   },
 } satisfies NextAuthConfig;

@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Link as LinkIcon, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "~/providers/language-provider";
 
 export default function JoinPage() {
+    const { t } = useLanguage();
     const { update } = useSession();
     const router = useRouter();
     const [token, setToken] = useState("");
@@ -28,7 +30,7 @@ export default function JoinPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || "Invalid or expired token");
+                throw new Error(data.message || t.join.error);
             }
 
             // Update session with new activeWorkspaceId
@@ -59,10 +61,10 @@ export default function JoinPage() {
 
                     <div className="text-center space-y-2">
                         <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-                            Join a Team
+                            {t.join.title}
                         </h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Enter your invitation token to gain access to your team's workspace.
+                            {t.join.subtitle}
                         </p>
                     </div>
 
@@ -80,7 +82,7 @@ export default function JoinPage() {
                         <div className="space-y-4">
                             <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">
-                                    Invitation Token
+                                    {t.join.tokenLabel}
                                 </label>
                                 <div className="relative group">
                                     <LinkIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
@@ -88,7 +90,7 @@ export default function JoinPage() {
                                         type="text"
                                         required
                                         className="block w-full rounded-xl border-gray-200 bg-gray-50 py-4 pl-12 pr-6 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                                        placeholder="Paste your token here..."
+                                        placeholder={t.join.tokenPlaceholder}
                                         value={token}
                                         onChange={(e) => setToken(e.target.value)}
                                         autoFocus
@@ -106,7 +108,7 @@ export default function JoinPage() {
                                 <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
                                 <>
-                                    Join Workspace
+                                    {t.join.button}
                                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </>
                             )}

@@ -3,8 +3,9 @@
 import { useTasksStore } from "~/stores/tasks.store";
 import { type TaskResponseDto } from "~/modules/tasks/tasks.dto";
 import { format } from "date-fns";
-import { Calendar, CheckCircle2, Circle, GripVertical } from "lucide-react";
+import { Calendar, CheckCircle2, Circle, GripVertical, Clock } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { useLanguage } from "~/providers/language-provider";
 
 export function TaskItem({
     task,
@@ -13,6 +14,7 @@ export function TaskItem({
     task: TaskResponseDto;
     dragHandleProps?: any;
 }) {
+    const { t } = useLanguage();
     const updateTask = useTasksStore((state) => state.updateTask);
 
     const toggleComplete = async (e: React.MouseEvent) => {
@@ -85,6 +87,10 @@ export function TaskItem({
                                 <span>{format(new Date(task.dueDate), "MMM d")}</span>
                             </span>
                         )}
+                        <span className="flex items-center space-x-1 text-gray-400 dark:text-gray-500" title={t.task.created}>
+                            <Clock className="h-3 w-3" />
+                            <span>{format(new Date(task.createdAt), "h:mm a")}</span>
+                        </span>
                     </div>
                 </div>
             </div>

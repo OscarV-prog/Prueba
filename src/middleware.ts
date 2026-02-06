@@ -21,41 +21,24 @@ export default auth((req) => {
     // Special handling for root route: always redirect to app or login
     if (nextUrl.pathname === "/") {
         if (isLoggedIn) {
-            if (!user?.activeWorkspaceId) {
-                console.log("[MW] Root -> Onboarding (No WS)");
-                return NextResponse.redirect(new URL("/onboarding", nextUrl));
-            }
             console.log("[MW] Root -> Dashboard");
             return NextResponse.redirect(new URL("/dashboard", nextUrl));
         }
+        console.log("[MW] Root -> Sign-in");
         return NextResponse.redirect(new URL("/auth/signin", nextUrl));
     }
 
     if (isPublicRoute) {
         if (isLoggedIn) {
-            if (!user?.activeWorkspaceId) {
-                console.log("[MW] Public -> Onboarding (No WS)");
-                return NextResponse.redirect(new URL("/onboarding", nextUrl));
-            }
-            console.log("[MW] Public -> Dashboard");
+            console.log("[MW] Public -> Dashboard (Logged in)");
             return NextResponse.redirect(new URL("/dashboard", nextUrl));
         }
         return NextResponse.next();
     }
 
-    const isApiRoute = nextUrl.pathname.startsWith("/api");
-
     if (!isLoggedIn) {
+        console.log("[MW] Redirecting to sign-in (Not logged in)");
         return NextResponse.redirect(new URL("/auth/signin", nextUrl));
-    }
-
-    if (!user?.activeWorkspaceId && !isOnboardingRoute && !isApiRoute) {
-        return NextResponse.redirect(new URL("/onboarding", nextUrl));
-    }
-
-    // Prevent accessing onboarding if already has a workspace
-    if (user?.activeWorkspaceId && isOnboardingRoute) {
-        return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
 
     return NextResponse.next();
