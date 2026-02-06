@@ -60,4 +60,6 @@ export const authConfigBase = {
     signIn: "/auth/signin",
     newUser: "/auth/signup",
   },
+  secret: process.env.AUTH_SECRET,
+  trustHost: true,
 } satisfies NextAuthConfig;

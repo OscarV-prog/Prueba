@@ -1,5 +1,28 @@
 # prueba - SaaS Productivity Platform
 
+## 🚀 Quick Start with Docker
+
+The easiest way to run the entire platform (App + Database) on any machine is using Docker.
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+
+### Steps
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/OscarV-prog/Prueba.git
+    cd Prueba
+    ```
+2.  **Start the services**:
+    ```bash
+    docker-compose up -d --build
+    ```
+3.  **Access the app**:
+    Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🛠️ Development Setup (No Docker)
 This project is bootstrapped with `create-t3-app` and follows a strict **Clean Architecture** pattern.
 
 ## Project Structure

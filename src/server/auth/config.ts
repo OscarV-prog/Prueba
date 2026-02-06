@@ -51,7 +51,7 @@ export const authConfig = {
     session: ({ session, user, token }) => {
       // Extended session callback for database-backed sessions if needed
       const baseSession = authConfigBase.callbacks.session({ session, token } as any);
-      
+
       const userId = user?.id ?? token?.sub;
       const activeWorkspaceId = (user as any)?.activeWorkspaceId ?? (token as any)?.activeWorkspaceId;
 
