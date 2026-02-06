@@ -33,25 +33,25 @@ export const authConfigBase = {
   ],
   callbacks: {
     session: ({ session, token }) => {
-      const userId = token?.sub;
-      const activeWorkspaceId = (token as any)?.activeWorkspaceId;
-
+      console.log("[Session Callback]", { activeWorkspaceId: (token as any).activeWorkspaceId });
       return {
         ...session,
         user: {
           ...session.user,
-          id: userId,
-          activeWorkspaceId,
+          id: token.sub,
+          activeWorkspaceId: (token as any).activeWorkspaceId ?? null,
         },
       };
     },
     jwt: ({ token, user, trigger, session }) => {
+      console.log("[JWT Callback]", { trigger, tokenWS: token.activeWorkspaceId, userWS: (user as any)?.activeWorkspaceId });
       if (user) {
-        token.activeWorkspaceId = (user as any).activeWorkspaceId;
         token.id = user.id;
+        token.activeWorkspaceId = (user as any).activeWorkspaceId ?? null;
       }
       if (trigger === "update" && (session as any)?.activeWorkspaceId) {
         token.activeWorkspaceId = (session as any).activeWorkspaceId;
+        console.log("[JWT Update] New workspace:", token.activeWorkspaceId);
       }
       return token;
     },
