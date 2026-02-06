@@ -10,7 +10,7 @@ export default auth((req) => {
     const user = req.auth?.user;
 
     const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
-    const isPublicRoute = ["/auth/signin", "/auth/signup", "/auth/accept-invitation"].includes(nextUrl.pathname);
+    const isPublicRoute = ["/", "/auth/signin", "/auth/signup", "/auth/accept-invitation"].includes(nextUrl.pathname);
     const isPublicApiRoute = ["/api/v1/auth/signup", "/api/v1/auth/accept-invitation"].includes(nextUrl.pathname);
     const isOnboardingRoute = nextUrl.pathname === "/onboarding";
 
