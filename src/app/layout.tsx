@@ -16,6 +16,7 @@ const geist = Geist({
 
 import { AuthProvider } from "~/components/auth-provider";
 import { ThemeProvider } from "~/components/theme-provider";
+import { LanguageProvider } from "~/providers/language-provider";
 import { Navbar } from "~/components/navbar";
 
 export default function RootLayout({
@@ -25,10 +26,12 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            <Navbar />
-            <main>{children}</main>
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <Navbar />
+              <main>{children}</main>
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

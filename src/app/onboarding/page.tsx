@@ -7,9 +7,12 @@ import { Briefcase, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "~/lib/utils";
 
+import { useLanguage } from "~/providers/language-provider";
+
 export default function OnboardingPage() {
     const { update } = useSession();
     const router = useRouter();
+    const { t } = useLanguage();
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -29,12 +32,19 @@ export default function OnboardingPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || "Something went wrong");
+                throw new Error(data.message || t.onboarding.error);
             }
 
-            await update({ activeWorkspaceId: data.id });
-            router.push("/dashboard");
+            // Force a session update and wait for it
+            await update({
+                activeWorkspaceId: data.id
+            });
+
+            // Critical: wait for a tiny bit to ensure the session is propagated
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             router.refresh();
+            router.push("/dashboard");
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -58,10 +68,10 @@ export default function OnboardingPage() {
 
                     <div className="text-center space-y-2">
                         <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-                            Create Your Workspace
+                            {t.onboarding.title}
                         </h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Prueba organizes your tasks into workspaces. Give yours a name to begin.
+                            {t.onboarding.description}
                         </p>
                     </div>
 
@@ -79,14 +89,14 @@ export default function OnboardingPage() {
                         <div className="space-y-4">
                             <div className="space-y-1">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">
-                                    Workspace Name
+                                    {t.onboarding.label}
                                 </label>
                                 <input
                                     name="name"
                                     type="text"
                                     required
                                     className="block w-full rounded-xl border-gray-200 bg-gray-50/50 py-4 px-6 text-sm shadow-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                                    placeholder="e.g. Acme Marketing, Personal Projects..."
+                                    placeholder={t.onboarding.placeholder}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     autoFocus
@@ -103,7 +113,7 @@ export default function OnboardingPage() {
                                 <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
                                 <>
-                                    Launch my workspace
+                                    {t.onboarding.button}
                                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </>
                             )}
@@ -113,7 +123,7 @@ export default function OnboardingPage() {
                     <div className="mt-12 flex items-center justify-center space-x-6 grayscale opacity-30 dark:invert">
                         <div className="flex items-center space-x-2">
                             <Sparkles className="h-4 w-4" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Premium Setup</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest">{t.onboarding.premium}</span>
                         </div>
                     </div>
                 </div>

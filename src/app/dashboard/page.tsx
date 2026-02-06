@@ -22,9 +22,11 @@ import {
 } from "@dnd-kit/sortable";
 import { generateMidpoint } from "~/utils/fractional-indexing";
 import { motion } from "framer-motion";
+import { useLanguage } from "~/providers/language-provider";
 
 export default function DashboardPage() {
     const { tasks, loading, fetchMyDayTasks, reorderTask } = useTasksStore();
+    const { t, language } = useLanguage();
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -80,10 +82,10 @@ export default function DashboardPage() {
             <div className="mx-auto max-w-3xl space-y-10">
                 <header className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        My Day
+                        {t.dashboard.myDay}
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400">
-                        {new Date().toLocaleDateString("en-US", {
+                    <p className="text-gray-500 dark:text-gray-400 capitalize">
+                        {new Date().toLocaleDateString(language === "en" ? "en-US" : "es-ES", {
                             weekday: "long",
                             month: "long",
                             day: "numeric",
@@ -111,7 +113,7 @@ export default function DashboardPage() {
                                 <section className="space-y-4">
                                     <h3 className="flex items-center text-xs font-bold uppercase tracking-wider text-red-500 dark:text-red-400">
                                         <span className="mr-2 h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                                        Overdue
+                                        {t.dashboard.overdue}
                                     </h3>
                                     <div className="space-y-3">
                                         <SortableContext
@@ -128,7 +130,7 @@ export default function DashboardPage() {
 
                             <section className="space-y-4">
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                    Today
+                                    {t.dashboard.today}
                                 </h3>
                                 <div className="space-y-3">
                                     {todayTasks.length > 0 ? (
@@ -158,10 +160,10 @@ export default function DashboardPage() {
                                                 </svg>
                                             </div>
                                             <h3 className="mt-6 text-sm font-semibold text-gray-900 dark:text-white">
-                                                You're all caught up!
+                                                {t.dashboard.allCaughtUp}
                                             </h3>
                                             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                Enjoy your productive day.
+                                                {t.dashboard.enjoyDay}
                                             </p>
                                         </div>
                                     )}

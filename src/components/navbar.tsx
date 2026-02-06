@@ -4,9 +4,12 @@ import Link from "next/link";
 import { ThemeToggle } from "./ui/theme-toggle";
 import { UserMenu } from "./auth/user-menu";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "~/providers/language-provider";
+import { LanguageToggle } from "./ui/language-toggle";
 
 export function Navbar() {
     const { data: session } = useSession();
+    const { t } = useLanguage();
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
@@ -25,25 +28,26 @@ export function Navbar() {
                                 href="/dashboard"
                                 className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
                             >
-                                Dashboard
+                                {t.common.dashboard}
                             </Link>
                             <Link
                                 href="/team"
                                 className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
                             >
-                                Team
+                                {t.common.team}
                             </Link>
                             <Link
                                 href="/join"
                                 className="text-sm font-medium text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
                             >
-                                Join Team
+                                {t.common.joinTeam}
                             </Link>
                         </div>
                     )}
                 </div>
 
                 <div className="flex items-center space-x-4">
+                    <LanguageToggle />
                     <ThemeToggle />
                     {session ? (
                         <UserMenu />
@@ -53,13 +57,13 @@ export function Navbar() {
                                 href="/auth/signin"
                                 className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                             >
-                                Log in
+                                {t.common.login}
                             </Link>
                             <Link
                                 href="/auth/signup"
                                 className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-700 hover:shadow-indigo-500/40"
                             >
-                                Sign up
+                                {t.common.signup}
                             </Link>
                         </div>
                     )}
