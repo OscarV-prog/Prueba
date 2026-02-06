@@ -24,10 +24,12 @@ declare module "next-auth" {
  */
 export const authConfigBase = {
   providers: [
-    DiscordProvider({
-      clientId: process.env.AUTH_DISCORD_ID,
-      clientSecret: process.env.AUTH_DISCORD_SECRET,
-    }),
+    ...(process.env.AUTH_DISCORD_ID && process.env.AUTH_DISCORD_SECRET
+      ? [DiscordProvider({
+        clientId: process.env.AUTH_DISCORD_ID,
+        clientSecret: process.env.AUTH_DISCORD_SECRET,
+      })]
+      : []),
   ],
   callbacks: {
     session: ({ session, token }) => {

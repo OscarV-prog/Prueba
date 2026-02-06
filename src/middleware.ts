@@ -10,11 +10,19 @@ export default auth((req) => {
     const user = req.auth?.user;
 
     const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
-    const isPublicRoute = ["/", "/auth/signin", "/auth/signup", "/auth/accept-invitation"].includes(nextUrl.pathname);
+    const isPublicRoute = ["/auth/signin", "/auth/signup", "/auth/accept-invitation"].includes(nextUrl.pathname);
     const isPublicApiRoute = ["/api/v1/auth/signup", "/api/v1/auth/accept-invitation"].includes(nextUrl.pathname);
     const isOnboardingRoute = nextUrl.pathname === "/onboarding";
 
     if (isApiAuthRoute || isPublicApiRoute) return NextResponse.next();
+
+    // Special handling for root route: always redirect to app or login
+    if (nextUrl.pathname === "/") {
+        if (isLoggedIn) {
+            return NextResponse.redirect(new URL("/dashboard", nextUrl));
+        }
+        return NextResponse.redirect(new URL("/auth/signin", nextUrl));
+    }
 
     if (isPublicRoute) {
         if (isLoggedIn) {
